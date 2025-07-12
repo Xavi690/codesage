@@ -3,3 +3,4 @@ requests
 fpdf
 razorpay
 setuptools
+flask-cors
