@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CodeSage - Pay with PhonePe</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='logo.css') }}">
+</head>
+<body>
+  <div class="box">
+    <img src="https://1drv.ms/i/c/05ecfd596288b92f/EV8QSTOwNrhMpymryeFkUc8BNqTEUIG5AO58OF0fje4DAQ?e=2Vn2iP" width="100" />
+    <h2>CodeSage</h2>
+    <p>Guiding you from basics to brilliance</p>
+    <form action="/pay" method="POST">
+      <input type="email" name="email" placeholder="Enter your email" required />
+      <button type="submit">Pay Now via PhonePe</button>
+    </form>
+  </div>
+</body>
+</html>
+
+
+
+
