@@ -1,79 +1,113 @@
-from flask import Flask, request, render_template, redirect
-import json, uuid, hashlib, base64
+import os
+import razorpay
+from flask import Flask, request, render_template, jsonify
+from flask_cors import CORS
+from dotenv import load_dotenv
 import smtplib
-from email.message import EmailMessage
-import requests
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
+from email.mime.application import MIMEApplication
 
-app = Flask(__name__)
+# Load environment variables
+load_dotenv()
 
-# 🔧 Replace with real values
-PHONEPE_MERCHANT_ID = "YOUR_MERCHANT_ID"
-PHONEPE_SALT_KEY = "YOUR_SALT_KEY"
-PHONEPE_HOST = "https://api.phonepe.com/apis/hermes"
-REDIRECT_URL = "http://localhost:5000/callback"
-WEBHOOK_URL = "http://localhost:5000/webhook"  # Optional
+app = Flask(_name_)
+CORS(app)
+
+# Razorpay client
+razorpay_client = razorpay.Client(
+    auth=(os.getenv("rzp_live_cCd5mHc6LgG8Mx"), os.getenv("pfPseIU9PQ4uBZOJD4Q4wmFp"))
+)
+
+# Store order ID to email mapping
+pending_orders = {}
 
 @app.route('/')
 def index():
     return render_template('index.html')
 
-@app.route('/pay', methods=['POST'])
-def pay():
-    email = request.form['email']
-    txn_id = str(uuid.uuid4())
+@app.route('/create_order', methods=['POST'])
+def create_order():
+    data = request.get_json()
+    email = data.get('email')
 
-    payload = {
-        "merchantId": PHONEPE_MERCHANT_ID,
-        "merchantTransactionId": txn_id,
-        "merchantUserId": email,
-        "amount": 9900,
-        "redirectUrl": REDIRECT_URL,
-        "redirectMode": "POST",
-        "callbackUrl": WEBHOOK_URL,
-        "paymentInstrument": {
-            "type": "PAY_PAGE"
-        }
-    }
+    if not email:
+        return jsonify({'error': 'Email is required'}), 400
 
-    payload_str = base64.b64encode(json.dumps(payload).encode()).decode()
-    checksum_str = f"{payload_str}/pg/v1/pay{PHONEPE_SALT_KEY}"
-    x_verify = hashlib.sha256(checksum_str.encode()).hexdigest() + "###1"
+    # Create Razorpay order
+    order = razorpay_client.order.create({
+        "amount": 10900,  # ₹109 in paise
+        "currency": "INR",
+        "payment_capture": 1
+    })
 
-    headers = {
-        "Content-Type": "application/json",
-        "X-VERIFY": x_verify
-    }
+    # Save order ID with email
+    pending_orders[order['id']] = email
 
-    res = requests.post(f"{PHONEPE_HOST}/pg/v1/pay", json={"request": payload_str}, headers=headers)
-    response = res.json()
+    return jsonify({
+        "key": os.getenv("RAZORPAY_KEY_ID"),
+        "amount": order['amount'],
+        "order_id": order['id']
+    })
 
-    if response.get("success"):
-        redirect_url = response["data"]["instrumentResponse"]["redirectInfo"]["url"]
-        return redirect(redirect_url)
-    else:
-        return "Error creating PhonePe payment."
+@app.route('/payment_webhook', methods=['POST'])
+def payment_webhook():
+    payload = request.get_data(as_text=True)
+    signature = request.headers.get('X-Razorpay-Signature')
 
-@app.route('/callback', methods=['POST'])
-def callback():
-    email = request.form.get("merchantUserId")
-    send_pdf_to_customer(email)
-    return "Payment successful! Your notes have been emailed."
+    try:
+        # ✅ SECURE: verify the webhook signature
+        razorpay_client.utility.verify_webhook_signature(
+            payload,
+            signature,
+            os.getenv("RAZORPAY_WEBHOOK_SECRET")  # You must set this in Render too!
+        )
+    except razorpay.errors.SignatureVerificationError:
+        print("❌ Invalid Razorpay signature.")
+        return "Invalid signature", 400
 
-def send_pdf_to_customer(email):
-    msg = EmailMessage()
-    msg['Subject'] = 'Your CodeSage Master Notes'
-    msg['From'] = 'youremail@gmail.com'
-    msg['To'] = email
-    msg.set_content('Dear Student,\n\nThank you for your payment. Please find your PDF notes attached.\n\n— Team CodeSage')
+    data = request.get_json()
+    event = data.get('event')
 
-    with open("master_notes.pdf", "rb") as f:
-        msg.add_attachment(f.read(), maintype='application', subtype='pdf', filename='master_notes.pdf')
+    if event == "payment.captured":
+        payment = data['payload']['payment']['entity']
+        order_id = payment['order_id']
 
-    with smtplib.SMTP_SSL("smtp.gmail.com", 465) as smtp:
-        smtp.login("xavitimes1@gmail.com",
-                    "hwyfiltzsbrhmyri")
-        smtp.send_message(msg)
+        # Get email from pending orders
+        email = pending_orders.get(order_id)
+        if email:
+            send_pdf(email)
+            print(f" PDF sent to {email}")
+        else:
+            print("⚠ Email not found for order ID:", order_id)
 
-if __name__ == '__main__':
-    app.run(host="0.0.0.0", port=10000)
+    return '', 200
+
+def send_pdf(recipient_email):
+    sender_email = os.getenv("EMAIL_USER")
+    sender_password = os.getenv("EMAIL_PASS")
+
+    message = MIMEMultipart()
+    message['From'] = sender_email
+    message['To'] = recipient_email
+    message['Subject'] = 'Your CodeSage Master Notes'
+
+    body = 'Thank you for purchasing the premium notes. Find the attached PDF below.'
+    message.attach(MIMEText(body, 'plain'))
+
+    # Attach the PDF
+    with open('master_notes.pdf', 'rb') as file:
+        part = MIMEApplication(file.read(), _subtype='pdf')
+        part.add_header('Content-Disposition', 'attachment', filename='master_notes.pdf')
+        message.attach(part)
+
+    # Send email using Gmail SMTP
+    with smtplib.SMTP_SSL('smtp.gmail.com', 465) as server:
+        server.login(sender_email, sender_password)
+        server.send_message(message)
+
+    print("📧 Email with PDF sent to", recipient_email)
+
+if _name_ == '_main_':
+    app.run(host='0.0.0.0', port=10000)
     
