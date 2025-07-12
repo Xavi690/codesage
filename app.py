@@ -9,7 +9,7 @@ from email.mime.text import MIMEText
 from email.mime.application import MIMEApplication
 
 # Load environment variables
-load_dotenv()
+load_dotenv("/etc/secrets/.env")
 
 app = Flask(__name__)
 CORS(app)
