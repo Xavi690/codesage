@@ -10,9 +10,8 @@ from email.mime.application import MIMEApplication
 # Load environment variables
 from dotenv import load_dotenv
 load_dotenv("/etc/secrets/.env")
-
-print("✅ DEBUG: Loaded RAZORPAY_KEY_ID =", os.getenv("RAZORPAY_KEY_ID"))
-print("✅ DEBUG: Loaded RAZORPAY_KEY_SECRET =", "✓" if os.getenv("RAZORPAY_KEY_SECRET") else "✗ MISSING")
+app = Flask(__name__)
+CORS(app)
 
 # Razorpay client with correct env variable usage
 razorpay_client = razorpay.Client(
