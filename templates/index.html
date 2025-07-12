@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <title>CodeSage - Master Notes</title>
+  <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
   <style>
     body {
       margin: 0;
@@ -27,7 +28,7 @@
       text-align: center;
     }
 
-    .logo1 {
+    .logo {
       width: 100px;
       margin-bottom: 20px;
     }
@@ -56,7 +57,7 @@
 
     button {
       width: 100%;
-      background-color: #673ab7;
+      background-color: #ff5722;
       color: white;
       border: none;
       padding: 12px;
@@ -67,7 +68,7 @@
     }
 
     button:hover {
-      background-color: #5a2ea6;
+      background-color: #e64a19;
     }
 
     .footer {
@@ -79,7 +80,8 @@
 </head>
 <body>
   <div class="container">
-    <img src="/static/logo1.jpg" alt="CodeSage Logo" class="logo">
+    <img src="/static/logo1.jpg" 
+      alt="CodeSage Logo" class="logo">
     <h1>CodeSage Master Notes</h1>
     <p>
       Welcome to <strong>CodeSage</strong>, the best platform to learn with.<br><br>
@@ -87,12 +89,55 @@
       The ultimate premium notes with great learning concepts is waiting for you — go grab it right now!
     </p>
     
-    <form action="/pay" method="post">
-      <input type="email" name="email" placeholder="Enter your email" required>
-      <button type="submit">Pay Now via PhonePe</button>
+    <form id="payment-form">
+      <input type="email" id="email" name="email" placeholder="Enter your email" required>
+      <button type="button" onclick="makePayment()">Pay Now via Razorpay</button>
     </form>
 
-    <div class="footer">© 2025 CodeSage All rights Reserved</div>
+    <div class="footer">© 2025 CodeSage All rights reserved</div>
   </div>
+
+  <script>
+    function makePayment() {
+      const email = document.getElementById("email").value;
+
+      if (!email) {
+        alert("Please enter your email before proceeding.");
+        return;
+      }
+
+      fetch("/create_order", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: email })
+      })
+      .then(res => res.json())
+      .then(data => {
+        var options = {
+          "key": data.key,
+          "amount": data.amount,
+          "currency": "INR",
+          "name": "CodeSage",
+          "description": "Purchase Master Notes",
+          "order_id": data.order_id,
+          "handler": function (response) {
+            alert("Payment successful! You’ll receive your PDF shortly.");
+          },
+          "prefill": {
+            "email": email
+          },
+          "theme": {
+            "color": "#673ab7"
+          }
+        };
+        var rzp = new Razorpay(options);
+        rzp.open();
+      })
+      .catch(err => {
+        console.error(err);
+        alert("Something went wrong. Please try again later.");
+      });
+    }
+  </script>
 </body>
 </html>
