@@ -45,7 +45,7 @@ def create_order():
     pending_orders[order['id']] = email
 
     return jsonify({
-        "key": os.getenv("RAZORPAY_KEY_ID"),
+        "key": os.getenv("rzp_live_cCd5mHc6LgG8Mx"),
         "amount": order['amount'],
         "order_id": order['id']
     })
@@ -60,7 +60,7 @@ def payment_webhook():
         razorpay_client.utility.verify_webhook_signature(
             payload,
             signature,
-            os.getenv("RAZORPAY_WEBHOOK_SECRET")  # You must set this in Render too!
+            os.getenv("pfPseIU9PQ4uBZOJD4Q4wmFp")  # You must set this in Render too!
         )
     except razorpay.errors.SignatureVerificationError:
         print("❌ Invalid Razorpay signature.")
@@ -84,8 +84,8 @@ def payment_webhook():
     return '', 200
 
 def send_pdf(recipient_email):
-    sender_email = os.getenv("EMAIL_USER")
-    sender_password = os.getenv("EMAIL_PASS")
+    sender_email = os.getenv("xavitimes1@gmailcom")
+    sender_password = os.getenv("hwyfiltzsbrhmyri")
 
     message = MIMEMultipart()
     message['From'] = sender_email
