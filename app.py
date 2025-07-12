@@ -11,7 +11,7 @@ from email.mime.application import MIMEApplication
 # Load environment variables
 load_dotenv()
 
-app = Flask(_name_)
+app = Flask(__name__)
 CORS(app)
 
 # Razorpay client
@@ -108,6 +108,6 @@ def send_pdf(recipient_email):
 
     print("📧 Email with PDF sent to", recipient_email)
 
-if _name_ == '_main_':
+if __name__ == '_main_':
     app.run(host='0.0.0.0', port=10000)
     
