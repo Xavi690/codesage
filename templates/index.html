@@ -28,7 +28,7 @@
       text-align: center;
     }
 
-    .logo1 {
+    .logo {
       width: 100px;
       margin-bottom: 20px;
     }
@@ -80,7 +80,7 @@
 </head>
 <body>
   <div class="container">
-    <img src="/static/logo1.jpg" alt="CodeSage Logo" class="logo1">
+    <img src="/static/logo1.jpg" alt="CodeSage Logo" class="logo">
     <h1>CodeSage Master Notes</h1>
     <p>
       Welcome to <strong>CodeSage</strong>, the best platform to learn with.<br><br>
@@ -90,7 +90,7 @@
 
     <form id="payment-form">
       <input type="email" id="email" name="email" placeholder="Enter your email" required>
-      <button type="button" onclick="makePayment()">Proceed Receiving PDF</button>
+      <button type="button" id="pay-btn" onclick="makePayment()">Proceed Receiving PDF</button>
     </form>
 
     <div class="footer">© 2025 CodeSage All rights reserved</div>
@@ -99,44 +99,55 @@
   <script>
     function makePayment() {
       const email = document.getElementById("email").value;
+      const button = document.getElementById("pay-btn");
 
       if (!email) {
         alert("Please enter your email before proceeding.");
         return;
       }
 
+      button.disabled = true;
+      button.innerText = "Processing...";
+
       fetch("/create_order", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email: email })
       })
-      .then(res => res.json())
+      .then(async res => {
+        if (!res.ok) {
+          const errText = await res.text();
+          throw new Error(errText || "Server error");
+        }
+        return res.json();
+      })
       .then(data => {
-        var options = {
-          "key": data.key,
-          "amount": data.amount,
-          "currency": "INR",
-          "name": "CodeSage",
-          "description": "Purchase Master Notes",
-          "order_id": data.order_id,
-          "handler": function (response) {
-            alert("Payment successful! You’ll receive your PDF shortly.");
+        const options = {
+          key: data.key,
+          amount: data.amount,
+          currency: "INR",
+          name: "CodeSage",
+          description: "Purchase Master Notes",
+          order_id: data.order_id,
+          handler: function () {
+            alert("✅ Payment successful! You’ll receive your PDF shortly.");
           },
-          "prefill": {
-            "email": email
-          },
-          "theme": {
-            "color": "#673ab7"
-          }
+          prefill: { email: email },
+          theme: { color: "#673ab7" }
         };
-        var rzp = new Razorpay(options);
+        const rzp = new Razorpay(options);
         rzp.open();
       })
       .catch(err => {
-        console.error(err);
-        alert("Something went wrong. Please try again later.");
+        console.error("❌", err);
+        alert("Something went wrong: " + err.message);
+      })
+      .finally(() => {
+        button.disabled = false;
+        button.innerText = "Proceed Receiving PDF";
       });
     }
   </script>
 </body>
 </html>
+
