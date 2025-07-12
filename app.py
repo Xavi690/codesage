@@ -16,7 +16,7 @@ CORS(app)
 
 # Razorpay client
 razorpay_client = razorpay.Client(
-    auth=(os.getenv("rzp_live_cCd5mHc6LgG8Mx"), os.getenv("pfPseIU9PQ4uBZOJD4Q4wmFp"))
+    auth=(os.getenv("RAZORPAY_KEY_ID"), os.getenv("RAZORPAY_KEY_SECRET"))
 )
 
 # Store order ID to email mapping
