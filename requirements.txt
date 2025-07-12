@@ -1,0 +1,8 @@
+flask
+requests
+fpdf
+razorpay
+setuptools
+flask-cors
+python-dotenv
+
