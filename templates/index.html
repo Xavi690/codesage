@@ -80,7 +80,7 @@
 </head>
 <body>
   <div class="container">
-    <img src="/static/logo1.jpg" alt="CodeSage Logo" class="logo">
+    <img src="/static/logo1.jpg" alt="CodeSage AI Master Notes Logo" class="logo">
     <h1>CodeSage Master Notes</h1>
     <p>
       Welcome to <strong>CodeSage</strong>, the best platform to learn with.<br><br>
@@ -88,17 +88,18 @@
       The ultimate premium notes with great learning concepts is waiting for you — go grab it right now!
     </p>
 
-    <form id="payment-form">
+    <!-- Removed form, replaced with div for clarity -->
+    <div id="payment-form">
       <input type="email" id="email" name="email" placeholder="Enter your email" required>
       <button type="button" id="pay-btn" onclick="makePayment()">Proceed Receiving PDF</button>
-    </form>
+    </div>
 
     <div class="footer">© 2025 CodeSage All rights reserved</div>
   </div>
 
   <script>
     function makePayment() {
-      const email = document.getElementById("email").value;
+      const email = document.getElementById("email").value.trim();
       const button = document.getElementById("pay-btn");
 
       if (!email) {
@@ -135,7 +136,14 @@
           prefill: { email: email },
           theme: { color: "#673ab7" }
         };
+
         const rzp = new Razorpay(options);
+
+        // Optional: handle payment failure/cancel
+        rzp.on('payment.failed', function () {
+          alert("❌ Payment failed or cancelled.");
+        });
+
         rzp.open();
       })
       .catch(err => {
@@ -146,6 +154,11 @@
         button.disabled = false;
         button.innerText = "Proceed Receiving PDF";
       });
+    }
+  </script>
+</body>
+</html>
+
     }
   </script>
 </body>
