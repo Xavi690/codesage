@@ -1,20 +1,97 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>CodeSage - Pay with PhonePe</title>
-  <link rel="stylesheet" href="{{ url_for('static', filename='logo.css') }}">
+  <meta charset="UTF-8">
+  <title>CodeSage - Master Notes</title>
+  <link rel="stylesheet" href="/static/logo.css">
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: "Segoe UI", sans-serif;
+      background: #f9f9f9;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
+
+    .container {
+      text-align: center;
+      background: white;
+      padding: 40px 30px;
+      border-radius: 20px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+      max-width: 420px;
+      width: 90%;
+    }
+
+    .logo {
+      width: 100px;
+      margin-bottom: 20px;
+    }
+
+    h1 {
+      font-size: 24px;
+      margin-bottom: 10px;
+      color: #333;
+    }
+
+    p {
+      color: #555;
+      font-size: 14px;
+      margin-bottom: 30px;
+      line-height: 1.6;
+    }
+
+    input[type="email"] {
+      width: 100%;
+      padding: 12px 15px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      font-size: 14px;
+    }
+
+    button {
+      width: 100%;
+      background-color: #673ab7;
+      color: white;
+      border: none;
+      padding: 12px;
+      font-size: 16px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    button:hover {
+      background-color: #5a2ea6;
+    }
+
+    .footer {
+      font-size: 12px;
+      color: #aaa;
+      margin-top: 25px;
+    }
+  </style>
 </head>
 <body>
-  <div class="box">
-    <img src="https://1drv.ms/i/c/05ecfd596288b92f/EV8QSTOwNrhMpymryeFkUc8BNqTEUIG5AO58OF0fje4DAQ?e=2Vn2iP" width="100" />
-    <h2>CodeSage</h2>
-    <p>Guiding you from basics to brilliance</p>
-    <form action="/pay" method="POST">
-      <input type="email" name="email" placeholder="Enter your email" required />
+  <div class="container">
+    <img src="/static/logo.png" alt="CodeSage Logo" class="logo">
+    <h1>CodeSage Master Notes</h1>
+    <p>
+      Welcome to <strong>CodeSage</strong>, the best platform to learn with.<br><br>
+      Enter your email below to receive the notes immediately after processing.<br><br>
+      The ultimate premium notes with great learning concepts is waiting for you — go grab it right now!
+    </p>
+    
+    <form action="/pay" method="post">
+      <input type="email" name="email" placeholder="Enter your email" required>
       <button type="submit">Pay Now via PhonePe</button>
     </form>
+
+    <div class="footer">© 2025 CodeSage</div>
   </div>
 </body>
 </html>
