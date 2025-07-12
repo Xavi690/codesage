@@ -2,17 +2,17 @@ import os
 import razorpay
 from flask import Flask, request, render_template, jsonify
 from flask_cors import CORS
-from dotenv import load_dotenv
 import smtplib
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from email.mime.application import MIMEApplication
 
 # Load environment variables
+from dotenv import load_dotenv
 load_dotenv("/etc/secrets/.env")
 
-app = Flask(__name__)
-CORS(app)
+print("✅ DEBUG: Loaded RAZORPAY_KEY_ID =", os.getenv("RAZORPAY_KEY_ID"))
+print("✅ DEBUG: Loaded RAZORPAY_KEY_SECRET =", "✓" if os.getenv("RAZORPAY_KEY_SECRET") else "✗ MISSING")
 
 # Razorpay client with correct env variable usage
 razorpay_client = razorpay.Client(
