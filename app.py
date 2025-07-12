@@ -10,6 +10,7 @@ from email.mime.application import MIMEApplication
 # Load environment variables
 from dotenv import load_dotenv
 load_dotenv("/etc/secrets/.env")
+
 app = Flask(__name__)
 CORS(app)
 
@@ -108,8 +109,4 @@ def send_pdf(recipient_email):
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 5000)))
 
-    print("📧 Email with PDF sent to", recipient_email)
-
-if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 5000)))
     
