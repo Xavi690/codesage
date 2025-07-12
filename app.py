@@ -2,14 +2,13 @@ import os
 import razorpay
 from flask import Flask, request, render_template, jsonify
 from flask_cors import CORS
-from dotenv import load_dotenv
 import smtplib
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from email.mime.application import MIMEApplication
+from dotenv import load_dotenv
 
-# Load environment variables
-load_dotenv()
+load_dotenv("/etc/secrets/secrets.env")
 
 app = Flask(__name__)
 CORS(app)
