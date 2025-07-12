@@ -5,4 +5,4 @@ razorpay
 setuptools
 flask-cors
 python-dotenv
-
+gunicorn
