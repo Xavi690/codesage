@@ -4,3 +4,4 @@ fpdf
 razorpay
 setuptools
 flask-cors
+python-dotenv
