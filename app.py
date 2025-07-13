@@ -107,7 +107,7 @@ def send_pdf(recipient_email):
 
     print("📧 Email with PDF sent to", recipient_email)
 
-if __name__ == '_main_':
+if __name__ == '__main__':
     app.run(host='0.0.0.0', port=10000)
     
     
