@@ -1,23 +1,108 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>CodeSage - Purchase Master Notes</title>
+  <meta charset="UTF-8">
+  <title>CodeSage - Master Notes</title>
+  <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: "Segoe UI", sans-serif;
+      background: url("/static/poster.jpg") no-repeat center top fixed;
+      background-size: contain;
+      background-color: #f1f1f1;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
+
+    .container {
+      background: rgba(255, 255, 255, 0.92);
+      padding: 40px 30px;
+      border-radius: 20px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+      max-width: 420px;
+      width: 90%;
+      text-align: center;
+    }
+
+    .logo {
+      width: 100px;
+      margin-bottom: 20px;
+    }
+
+    h1 {
+      font-size: 24px;
+      margin-bottom: 10px;
+      color: #333;
+    }
+
+    p {
+      color: #555;
+      font-size: 14px;
+      margin-bottom: 30px;
+      line-height: 1.6;
+    }
+
+    input[type="email"] {
+      width: 100%;
+      padding: 12px 15px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      font-size: 14px;
+    }
+
+    button {
+      width: 100%;
+      background-color: #ff5722;
+      color: white;
+      border: none;
+      padding: 12px;
+      font-size: 16px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    button:hover {
+      background-color: #e64a19;
+    }
+
+    .footer {
+      font-size: 12px;
+      color: #aaa;
+      margin-top: 25px;
+    }
+  </style>
 </head>
 <body>
-  <h2>Buy Master Notes for ₹49.90</h2>
-  <input type="email" id="email" placeholder="Enter your email" required />
-  <button id="pay-btn" onclick="makePayment()">Proceed Receiving PDF</button>
+  <div class="container">
+    <img src="/static/logo1.jpg" alt="CodeSage Logo" class="logo">
+    <h1>CodeSage Master Notes</h1>
+    <p>
+      Welcome to <strong>CodeSage</strong> — the best platform to learn smarter.<br><br>
+      Enter your email below to receive the PDF notes right after payment.<br><br>
+      The ultimate premium notes with practical concepts are just one click away!
+    </p>
 
-  <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+    <div id="payment-form">
+      <input type="email" id="email" placeholder="Enter your email" required>
+      <button id="pay-btn" onclick="makePayment()">Proceed Receiving PDF</button>
+    </div>
+
+    <div class="footer">© 2025 CodeSage. All rights reserved.</div>
+  </div>
+
   <script>
     function makePayment() {
       const email = document.getElementById("email").value.trim();
       const button = document.getElementById("pay-btn");
 
       if (!email) {
-        alert("Please enter your email.");
+        alert("⚠️ Please enter your email before proceeding.");
         return;
       }
 
@@ -30,7 +115,10 @@
         body: JSON.stringify({ email: email })
       })
       .then(async res => {
-        if (!res.ok) throw new Error(await res.text());
+        if (!res.ok) {
+          const errText = await res.text();
+          throw new Error(errText || "Server error");
+        }
         return res.json();
       })
       .then(data => {
@@ -39,24 +127,27 @@
           amount: data.amount,
           currency: "INR",
           name: "CodeSage",
-          description: "Master Notes PDF",
+          description: "Purchase Master Notes",
           image: "/static/logo1.jpg",
           order_id: data.order_id,
+          prefill: { email: email },
+          theme: { color: "#673ab7" },
           handler: function () {
             alert("✅ Payment successful! You’ll receive your PDF shortly.");
-          },
-          prefill: { email: email },
-          theme: { color: "#673ab7" }
+          }
         };
 
         const rzp = new Razorpay(options);
-        rzp.on("payment.failed", () => {
-          alert("❌ Payment failed or cancelled.");
+
+        rzp.on('payment.failed', function () {
+          alert("❌ Payment failed or was cancelled.");
         });
+
         rzp.open();
       })
       .catch(err => {
-        alert("Error: " + err.message);
+        console.error("❌", err);
+        alert("Something went wrong: " + err.message);
       })
       .finally(() => {
         button.disabled = false;
