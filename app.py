@@ -11,23 +11,23 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from email.mime.application import MIMEApplication
 
-# ✅ Load .env from Render secret file path
+# ✅ Load environment variables from .env file on Render
 load_dotenv("/etc/secrets/.env")
 
 app = Flask(__name__)
 CORS(app)
 
-# ✅ Razorpay client setup with environment variables
+# ✅ Razorpay client setup
 razorpay_client = razorpay.Client(
     auth=(os.getenv("RAZORPAY_KEY_ID"), os.getenv("RAZORPAY_KEY_SECRET"))
 )
 
-# ✅ Store email per order
+# ✅ Dictionary to store order_id → email mapping
 pending_orders = {}
 
 @app.route('/')
 def index():
-    return render_template('index.html')
+    return render_template('index.html')  # index.html must be inside templates folder
 
 @app.route('/create_order', methods=['POST'])
 def create_order():
@@ -38,9 +38,9 @@ def create_order():
         if not email:
             return jsonify({'error': 'Email is required'}), 400
 
-        # ✅ Create Razorpay order
+        # ✅ Create Razorpay order (₹2 = 200 paise)
         order = razorpay_client.order.create({
-            "amount": 200,  # ₹109 in paise
+            "amount": 200,
             "currency": "INR",
             "payment_capture": 1
         })
@@ -64,7 +64,6 @@ def payment_webhook():
     signature = request.headers.get('X-Razorpay-Signature')
 
     try:
-        # ✅ Verify webhook authenticity
         razorpay_client.utility.verify_webhook_signature(
             payload,
             signature,
@@ -93,6 +92,11 @@ def payment_webhook():
 def send_pdf(recipient_email):
     sender_email = os.getenv("EMAIL_USER")
     sender_password = os.getenv("EMAIL_PASS")
+    file_path = 'master_notes.pdf'
+
+    if not os.path.exists(file_path):
+        print(f"❌ PDF file not found: {file_path}")
+        return
 
     message = MIMEMultipart()
     message['From'] = sender_email
@@ -102,7 +106,7 @@ def send_pdf(recipient_email):
     body = 'Thank you for purchasing the premium notes. Find the attached PDF below.'
     message.attach(MIMEText(body, 'plain'))
 
-    with open('master_notes.pdf', 'rb') as file:
+    with open(file_path, 'rb') as file:
         part = MIMEApplication(file.read(), _subtype='pdf')
         part.add_header('Content-Disposition', 'attachment', filename='master_notes.pdf')
         message.attach(part)
@@ -113,7 +117,7 @@ def send_pdf(recipient_email):
 
     print("✅ Email with PDF sent to", recipient_email)
 
-# ✅ Self-ping function to prevent Render sleeping
+# 🔁 Background thread to ping app every 5 minutes to prevent sleeping
 def self_ping():
     while True:
         try:
@@ -121,10 +125,10 @@ def self_ping():
             requests.get("https://codesage-kcd4.onrender.com/")
         except Exception as e:
             print("❌ Self-ping failed:", e)
-        time.sleep(300)  # every 5 minutes
+        time.sleep(300)  # 5 minutes
 
 if __name__ == '__main__':
-    # 🔁 Start background self-ping thread
     threading.Thread(target=self_ping, daemon=True).start()
     app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 5000)))
+
     
