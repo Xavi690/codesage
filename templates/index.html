@@ -1,59 +1,69 @@
-<script>
-  function makePayment() {
-    const email = document.getElementById("email").value.trim();
-    const button = document.getElementById("pay-btn");
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>CodeSage - Purchase Master Notes</title>
+</head>
+<body>
+  <h2>Buy Master Notes for ₹49.90</h2>
+  <input type="email" id="email" placeholder="Enter your email" required />
+  <button id="pay-btn" onclick="makePayment()">Proceed Receiving PDF</button>
 
-    if (!email) {
-      alert("Please enter your email before proceeding.");
-      return;
-    }
+  <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+  <script>
+    function makePayment() {
+      const email = document.getElementById("email").value.trim();
+      const button = document.getElementById("pay-btn");
 
-    button.disabled = true;
-    button.innerText = "Processing...";
-
-    fetch("/create_order", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email: email })
-    })
-    .then(async res => {
-      if (!res.ok) {
-        const errText = await res.text();
-        throw new Error(errText || "Server error");
+      if (!email) {
+        alert("Please enter your email.");
+        return;
       }
-      return res.json();
-    })
-    .then(data => {
-      const options = {
-        key: data.key,
-        amount: data.amount,
-        currency: "INR",
-        name: "CodeSage",
-        description: "Purchase Master Notes",
-        image: "/static/logo1.jpg",  // ✅ Added to prevent Razorpay 404 error
-        order_id: data.order_id,
-        handler: function () {
-          alert("✅ Payment successful! You’ll receive your PDF shortly.");
-        },
-        prefill: { email: email },
-        theme: { color: "#673ab7" }
-      };
 
-      const rzp = new Razorpay(options);
+      button.disabled = true;
+      button.innerText = "Processing...";
 
-      rzp.on('payment.failed', function () {
-        alert("❌ Payment failed or cancelled.");
+      fetch("/create_order", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: email })
+      })
+      .then(async res => {
+        if (!res.ok) throw new Error(await res.text());
+        return res.json();
+      })
+      .then(data => {
+        const options = {
+          key: data.key,
+          amount: data.amount,
+          currency: "INR",
+          name: "CodeSage",
+          description: "Master Notes PDF",
+          image: "/static/logo1.jpg",
+          order_id: data.order_id,
+          handler: function () {
+            alert("✅ Payment successful! You’ll receive your PDF shortly.");
+          },
+          prefill: { email: email },
+          theme: { color: "#673ab7" }
+        };
+
+        const rzp = new Razorpay(options);
+        rzp.on("payment.failed", () => {
+          alert("❌ Payment failed or cancelled.");
+        });
+        rzp.open();
+      })
+      .catch(err => {
+        alert("Error: " + err.message);
+      })
+      .finally(() => {
+        button.disabled = false;
+        button.innerText = "Proceed Receiving PDF";
       });
+    }
+  </script>
+</body>
+</html>
 
-      rzp.open();
-    })
-    .catch(err => {
-      console.error("❌", err);
-      alert("Something went wrong: " + err.message);
-    })
-    .finally(() => {
-      button.disabled = false;
-      button.innerText = "Proceed Receiving PDF";
-    });
-  }
-</script>
