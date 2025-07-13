@@ -14,7 +14,7 @@ from email.mime.application import MIMEApplication
 # ✅ Load .env from Render secret file path
 load_dotenv("/etc/secrets/.env")
 
-app = Flask(_name_)
+app = Flask(__name__)
 CORS(app)
 
 # ✅ Razorpay client setup with environment variables
@@ -123,7 +123,7 @@ def self_ping():
             print("❌ Self-ping failed:", e)
         time.sleep(300)  # every 5 minutes
 
-if __name__ == '_main_':
+if __name__ == '__main__':
     # 🔁 Start background self-ping thread
     threading.Thread(target=self_ping, daemon=True).start()
     app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 5000)))
