@@ -38,9 +38,9 @@ def create_order():
         if not email:
             return jsonify({'error': 'Email is required'}), 400
 
-        # ✅ Create Razorpay order (₹2 = 200 paise)
+        # ✅ Create Razorpay order (₹109 = 10900 paise)
         order = razorpay_client.order.create({
-            "amount": 200,
+            "amount": 10900,
             "currency": "INR",
             "payment_capture": 1
         })
