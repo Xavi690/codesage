@@ -123,7 +123,7 @@ def self_ping():
             print("❌ Self-ping failed:", e)
         time.sleep(300)  # every 5 minutes
 
-if _name_ == '_main_':
+if __name__ == '_main_':
     # 🔁 Start background self-ping thread
     threading.Thread(target=self_ping, daemon=True).start()
     app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 5000)))
