@@ -8,6 +8,6 @@ services:
     envVars:
       - key: PYTHON_VERSION
         value: 3.10
-    secretFiles:
-      - name: secrets.env
-        mountPath: /etc/secrets/.env
+    envVarsFromFile:
+      - path: secrets.env
+
