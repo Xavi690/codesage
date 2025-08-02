@@ -85,7 +85,7 @@
     <p>
       Welcome to <strong>CodeSage</strong> — the best platform to learn smarter.<br><br>
       Enter your email below to receive the PDF notes right after payment.<br><br>
-      The ultimate premium notes with practical concepts are just one click away!.<br><br>
+      The ultimate premium notes with practical concepts are just one click away!<br><br>
       Retry once again if you see any server error.
     </p>
 
@@ -98,6 +98,13 @@
   </div>
 
   <script>
+    // 👇 Wake backend to avoid first-click errors
+    window.addEventListener("DOMContentLoaded", () => {
+      fetch("/ping_backend")
+        .then(res => console.log("✅ Backend pinged:", res.status))
+        .catch(err => console.error("❌ Backend ping failed:", err));
+    });
+
     function makePayment() {
       const email = document.getElementById("email").value.trim();
       const button = document.getElementById("pay-btn");
@@ -134,7 +141,7 @@
           prefill: { email: email },
           theme: { color: "#673ab7" },
           handler: function () {
-            alert("✅ Payment successful! You’ll receive your PDF shortly through email.");
+            alert("✅ Payment successful! You’ll receive your PDF shortly through email, check inbox or spam section.");
           }
         };
 
@@ -157,5 +164,7 @@
     }
   </script>
 </body>
+</html>
+
 </html>
 
