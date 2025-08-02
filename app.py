@@ -11,7 +11,7 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from email.mime.application import MIMEApplication
 
-# ✅ Load environment variables from .env file on Render
+# ✅ Load environment variables from .env file (Render path)
 load_dotenv("/etc/secrets/.env")
 
 app = Flask(__name__)
@@ -22,12 +22,12 @@ razorpay_client = razorpay.Client(
     auth=(os.getenv("RAZORPAY_KEY_ID"), os.getenv("RAZORPAY_KEY_SECRET"))
 )
 
-# ✅ Dictionary to store order_id → email mapping
+# ✅ Store order_id → email temporarily
 pending_orders = {}
 
 @app.route('/')
 def index():
-    return render_template('index.html')  # index.html must be inside templates folder
+    return render_template('index.html')  # templates/index.html
 
 @app.route('/create_order', methods=['POST'])
 def create_order():
@@ -117,18 +117,25 @@ def send_pdf(recipient_email):
 
     print("✅ Email with PDF sent to", recipient_email)
 
-# 🔁 Background thread to ping app every 5 minutes to prevent sleeping
+@app.route('/ping_backend', methods=['GET'])
+def ping_backend():
+    print("📡 Backend ping received.")
+    return jsonify({"status": "Backend is awake"}), 200
+
+# 🔁 Keep backend awake (Render free-tier workaround)
 def self_ping():
     while True:
         try:
-            print("🔁 Self-pinging to keep app awake...")
-            requests.get("https://codesage-kcd4.onrender.com/")
+            print("🔁 Self-pinging /ping_backend to keep backend alive...")
+            requests.get("https://codesage-kcd4.onrender.com/ping_backend")
         except Exception as e:
             print("❌ Self-ping failed:", e)
-        time.sleep(300)  # 5 minutes
+        time.sleep(300)  # Every 5 minutes
 
 if __name__ == '__main__':
     threading.Thread(target=self_ping, daemon=True).start()
     app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 5000)))
 
+
     
+
